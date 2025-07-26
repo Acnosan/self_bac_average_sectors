@@ -3,25 +3,29 @@ import os
 from pathlib import Path
 
 input_folder = 'outputs'
+Path("processed_outputs").mkdir(parents=True, exist_ok=True)
 
 def main():
     for f in os.listdir(input_folder):
-        output_csv = f'{f}_output.csv'
-        if not os.path.exists(output_csv):
-            for csv_files in os.listdir(Path(input_folder,f)): 
-                input_csv = os.path.join(input_folder, f, csv_files)
-                df = pd.read_csv(input_csv)
+        folder_path = os.path.join(input_folder, f)
+        if os.path.isdir(folder_path):
+            output_csv = os.path.join("processed_outputs", f"{f}_output.csv")
+            if not os.path.exists(output_csv):
+                for csv_files in os.listdir(Path(input_folder,f)): 
+                    input_csv = os.path.join(input_folder, f, csv_files)
+                    df = pd.read_csv(input_csv)
 
-                df.columns = df.columns.str.strip().str.replace('\r', '').str.replace('\n', '').str.replace('  ', '').str.replace(' ', '').str.strip()
-                df['Etablissement'] = df['Etablissement'].str.replace('"', '').str.replace(r'\s+', ' ', regex=True).str.strip()
-                df['Filiere'] = df['Filiere'].str.replace('"', '').str.replace(r'\s+', ' ', regex=True).str.strip()
-                df['Min1'] = pd.to_numeric(df['Min1'], errors='coerce')
-                df['Min2'] = pd.to_numeric(df['Min1'], errors='coerce')
-                df['Min3'] = pd.to_numeric(df['Min1'], errors='coerce')
-                
-                df.drop(df.columns[df.columns.str.contains('unnamed',case = False)],axis=1, inplace=True)
-                # If file is new, write header, otherwise skip header
-                df.to_csv(output_csv, mode='a', index=False, header=not os.path.exists(output_csv), columns=df.columns)
+                    df.columns = df.columns.str.strip().str.replace('\r', '').str.replace('\n', '').str.replace('  ', '').str.replace(' ', '').str.strip()
+                    df['Etablissement'] = df['Etablissement'].str.replace('"', '').str.replace(r'\s+', ' ', regex=True).str.strip()
+                    df['Filiere'] = df['Filiere'].str.replace('"', '').str.replace(r'\s+', ' ', regex=True).str.strip()
+                    df['Min1'] = pd.to_numeric(df['Min1'], errors='coerce')
+                    df['Min2'] = pd.to_numeric(df['Min1'], errors='coerce')
+                    df['Min3'] = pd.to_numeric(df['Min1'], errors='coerce')
+                    
+                    df.drop(df.columns[df.columns.str.contains('unnamed',case = False)],axis=1, inplace=True)
+                    # If file is new, write header, otherwise skip header
+                    df.to_csv(output_csv, mode='a', index=False, header=not os.path.exists(output_csv), columns=df.columns)
+            print(f"The processed output {output_csv} does exists")
 
 if __name__ == "__main__":
     main()
